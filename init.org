@@ -1,20 +1,28 @@
 #+PROPERTY: header-args :results silent :tangle "~/.config/emacs/init.el"
+#+OPTIONS: toc:t
 
+* Configuration
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
+** Load Proper Environment Variables
+#+begin_src elisp
 ;; Install and set up exec-path-from-shell to load environment variables from .zshrc
-(use-package exec-path-from-shell
-  :ensure t
-  :config
-  (when (memq window-system '(mac ns x))
-    (setq exec-path-from-shell-variables '("PATH" "MANPATH" "ZSH" "SHELL"))
-    (exec-path-from-shell-initialize)))
+(use-package
+ exec-path-from-shell
+ :ensure t
+ :config
+ (when (memq window-system '(mac ns x))
+   (setq exec-path-from-shell-variables
+         '("PATH" "MANPATH" "ZSH" "SHELL"))
+   (exec-path-from-shell-initialize)))
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
+** Package Manager Configuration
+#+begin_src elisp
 ;; Package manager setup
 (require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(add-to-list
+ 'package-archives '("melpa" . "https://melpa.org/packages/")
+ t)
 (package-initialize)
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
@@ -23,107 +31,124 @@
 (setq use-package-always-ensure t)
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
+** Clipboard Configuration
+#+begin_src elisp
 ;; Use system clipboard
-(setq select-enable-clipboard t)(defun copy-from-osx ()
-   (shell-command-to-string "pbpaste"))
+(setq select-enable-clipboard t)
+(defun copy-from-osx ()
+  (shell-command-to-string "pbpaste"))
 (defun paste-to-osx (text &optional push)
-   (let ((process-connection-type nil))
-      (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
-         (process-send-string proc text)
-         (process-send-eof proc))))
+  (let ((process-connection-type nil))
+    (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
+      (process-send-string proc text)
+      (process-send-eof proc))))
 (setq interprogram-cut-function 'paste-to-osx)
 (setq interprogram-paste-function 'copy-from-osx)
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-;; Stop making ugly back up files
+** Backup File Configuration (needs reviewed)
+#+begin_src elisp
+;; Disable annoying backup files
 (setq make-backup-files nil)
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-;; #+ATTR_HTML: width="100px"
-;; #+ATTR_ORG: :width 100
-(setq org-image-actual-width nil)
+** Theme Configuration
+#+begin_src elisp
+(use-package
+ doom-themes
+ :ensure t
+ :config
+ ;; Global Settings (defaults)
+ (setq
+  doom-themes-enable-bold t
+  doom-themes-enable-italic t)
+ ;; Load theme
+ (load-theme 'doom-snazzy t)
+
+ ;; Enable flashing mode-line on errors
+ (doom-themes-visual-bell-config)
+
+ ;; Corrects and improves org-mode's native fontification
+ (doom-themes-org-config))
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-(add-hook 'org-mode-hook
-          (lambda () (add-hook 'after-save-hook #'org-babel-tangle
-                          :append :local)))
+** Buffer Configuration
+
+*** M-x
+#+begin_src elisp
+(ido-mode)
+(ido-everywhere 1)
+(setq ido-enable-flex-matching t)
+(global-set-key
+ "\M-x"
+ (lambda ()
+   (interactive)
+   (call-interactively
+    (intern
+     (ido-completing-read
+      "M-x " (all-completions "" obarray 'commandp))))))
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-  (use-package doom-themes
-    :ensure t
-    :config
-    ;; Global Settings (defaults)
-    (setq doom-themes-enable-bold t
-	  doom-themes-enable-italic t)
-    ;; Load theme
-    (load-theme 'doom-snazzy t)
+*** Help
 
-    ;; Enable flashing mode-line on errors
-    (doom-themes-visual-bell-config)
-
-    ;; Corrects and improves org-mode's native fontification
-    (doom-themes-org-config))
+**** Which-Key
+#+begin_src elisp
+(use-package which-key :config (which-key-mode))
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
+**** Toolbar Removal
+#+begin_src elisp
 ;; Tool bar settings
 (tool-bar-mode -1)
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
+**** Help Menu
+#+begin_src elisp
+;; Rebind `C-h` (help-command) to `C-?`
+(global-set-key (kbd "C-?") 'help-command)
+#+end_src
+
+*** Look & Feel
+
+**** Look
+
+***** Relative Line Numbers
+#+begin_src elisp
 ;; Line numbers
 (global-display-line-numbers-mode 1)
 (setq display-line-numbers-type 'relative)
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-;; Ensure proper mouse and key handling in terminal
-(setq xterm-mouse-mode t)
+***** Easy Cursor Tracking
+#+begin_src elisp
+;; Keep track of cursor easier
+(beacon-mode 1)
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-;; Disable annoying backup files
-(setq make-backup-files nil)
+***** Pair Coloring
+#+begin_src elisp
+;; Rainbow delimiters
+(add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-;; Allow C-n to add newlines at the end of the buffer
-(setq next-line-add-newlines t)
-#+end_src
-
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-;; Enable natural selection behavior
-(delete-selection-mode t)
-#+end_src
-
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-;; Relative line numbers
-(setq display-line-numbers-type 'relative)
-#+end_src
-
-#+begin_src elisp :tangle ~/.config/emacs/init.el
+**** Whitespace Handling
+#+begin_src elisp
 ;; Remove trailing whitespace on save
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-;; Easier Splits
-(global-set-key (kbd "M-|") 'split-window-right)
-(global-set-key (kbd "M-\-") 'split-window-below)
+**** Feel
+
+***** Mouse Handling
+#+begin_src elisp
+;; Ensure proper mouse and key handling in terminal
+(setq xterm-mouse-mode t)
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-;; Rebind `C-h` (help-command) to `C-?`
-(global-set-key (kbd "C-?") 'help-command)
-#+end_src
+** Text Editing
 
-
-#+begin_src elisp :tangle ~/.config/emacs/init.el
+*** Easy Pair Wrapping
+#+begin_src elisp
 ;; Easy wrapping of matching characters
 (global-set-key (kbd "M-[") 'insert-pair)
 (global-set-key (kbd "M-{") 'insert-pair)
@@ -132,120 +157,46 @@
 (global-set-key (kbd "M-]") 'delete-pair)
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-;; Compile
-(global-set-key (kbd "M-c") 'compile)
-(setq compilation-scroll-output t)
-(add-hook 'compilation-finish-functions 'switch-to-buffer-other-window 'compilation)
-(setq compilation-auto-jump-to-first-error t)
-#+end_src
-
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-;; Keep track of cursor easier
-(beacon-mode 1)
-#+end_src
-
-#+begin_src elisp :tangle ~/.config/emacs/init.el
+*** Improved Delete
+#+begin_src elisp
 ;; Awesome delete
 (global-set-key (kbd "M-z") 'ace-jump-zap-to-char)
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-;; Expand region with M-n and contract with M-p
-(use-package expand-region
-  :bind
-  (("M-n" . er/expand-region)
-   ("M-p" . er/contract-region)))
+** Coding Niceties
+
+*** Completion
+#+begin_src elisp
+(use-package
+ company
+ :config
+ (setq
+  company-idle-delay 0
+  company-minimum-prefix-length 2
+  company-selection-wrap-around t))
+(global-company-mode)
+(use-package company)
+(add-hook 'after-init-hook 'global-company-mode)
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-;; Multiple cursors setup
-(use-package multiple-cursors
-  :bind
-  (("C-J" . mc/mark-next-like-this)
-   ("C-K" . mc/mark-previous-like-this)
-   ("M-8" . mc/mark-all-like-this)
-   ("C-." . mc/mark-all-in-region-regexp)))
-#+end_src
-
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-;; Visual replacement in real-time
-(use-package visual-replace
-   :defer t
-   :bind (("C-c r" . visual-replace)
-          :map isearch-mode-map
-          ("C-c r" . visual-replace-from-isearch)))
-#+end_src
-
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-;; Rainbow delimiters
-(add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
-#+end_src
-
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-;; Vim-like keybindings for inserting lines
-(defun vim-o ()
-  "Insert a new line below the current line and move to it."
-  (interactive)
-  (end-of-line)
-  (newline-and-indent))
-
-(defun vim-O ()
-  "Insert a new line above the current line and move to it."
-  (interactive)
-  (beginning-of-line)
-  (newline-and-indent)
-  (forward-line -1)
-  (indent-according-to-mode))
-
-;; Bind Alt-o to `vim-o`
-(global-set-key (kbd "M-o") 'vim-o)
-;; Bind Alt-o to `vim-O`
-(global-set-key (kbd "M-O") 'vim-O)
-#+end_src
-
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-(global-set-key (kbd "C-x w h") 'previous-buffer)
-(global-set-key (kbd "C-x w l") 'next-buffer)
-#+end_src
-
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-(setq scroll-error-top-bottom t)
-#+end_src
-
-#+begin_src elisp :tangle ~/.config/emacs/init.el
+*** Highlighting
+#+begin_src elisp
 (use-package tree-sitter)
 (use-package tree-sitter-langs)
 
 (global-tree-sitter-mode)
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-;; Rust development setup
-(add-to-list 'load-path "~/Yro/repos/emacs_packages/rust-mode/")
-(autoload 'rust-mode "rust-mode" nil t)
-(add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
-
-;;(add-hook 'rust-mode-hook 'eglot-ensure)
-(setq rust-format-on-save t)
-(add-hook 'rust-mode-hook
-          (lambda () (setq indent-tabs-mode nil)))
-(add-hook 'rust-mode-hook
-          (lambda () (prettify-symbols-mode)))
-
-(add-to-list 'load-path "~/Yro/repos/emacs_packages/python-mode/")
-(autoload 'python-mode "python-mode" nil t)
-(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
-#+end_src
-
-#+begin_src elisp :tangle ~/.config/emacs/init.el
+*** Toggle Documentation
+#+begin_src elisp
 (defun toggle-eldoc ()
   "Toggle display of the eldoc documentation buffer.
 If the buffer (returned by `eldoc-doc-buffer`) is visible, delete its window;
 otherwise, display it."
   (interactive)
   (if (not (fboundp 'eldoc-doc-buffer))
-      (message "eldoc-doc-buffer is not defined in this Emacs version.")
+      (message
+       "eldoc-doc-buffer is not defined in this Emacs version.")
     (let ((buf (eldoc-doc-buffer)))
       (if (get-buffer-window buf)
           (delete-window (get-buffer-window buf))
@@ -255,82 +206,232 @@ otherwise, display it."
 (global-set-key (kbd "M-e") 'toggle-eldoc)
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-(use-package eglot
-  :ensure t
-  :hook ((python-mode . eglot-ensure)
-         (rust-mode   . eglot-ensure))
-  :bind (:map eglot-mode-map
-              ("C-c C-a" . eglot-code-actions)
-	      ("C-c C-r" . eglot-rename)
-	      ))
+*** Language Support
+
+**** Rust
+#+begin_src elisp
+;; Rust development setup
+(add-to-list 'load-path "~/Yro/repos/emacs_packages/rust-mode/")
+(autoload 'rust-mode "rust-mode" nil t)
+(add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
+
+;;(add-hook 'rust-mode-hook 'eglot-ensure)
+(setq rust-format-on-save t)
+(add-hook 'rust-mode-hook (lambda () (setq indent-tabs-mode nil)))
+(add-hook 'rust-mode-hook (lambda () (prettify-symbols-mode)))
+
+(add-to-list 'load-path "~/Yro/repos/emacs_packages/python-mode/")
+(autoload 'python-mode "python-mode" nil t)
+(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-(use-package flycheck
-  :ensure t
-  :bind
-  ("C-c C-d l" . flymake-goto-next-error)
-  ("C-c C-d h" . flymake-goto-prev-error)
-  ("C-c C-c d" . flymake-show-buffer-diagnostics)
-  ("C-c C-c D" . flymake-show-project-diagnostics)
-  :config
-  (add-hook 'after-init-hook #'global-flycheck-mode))
+**** Python
+#+begin_src elisp
+(use-package
+ eglot
+ :ensure t
+ :hook ((python-mode . eglot-ensure) (rust-mode . eglot-ensure))
+ :bind
+ (:map
+  eglot-mode-map
+  ("C-c C-a" . eglot-code-actions)
+  ("C-c C-r" . eglot-rename)))
+#+end_src
+
+*** Diagnostics
+#+begin_src elisp
+(use-package
+ flycheck
+ :ensure t
+ :bind
+ ("C-c C-d l" . flymake-goto-next-error)
+ ("C-c C-d h" . flymake-goto-prev-error)
+ ("C-c C-c d" . flymake-show-buffer-diagnostics)
+ ("C-c C-c D" . flymake-show-project-diagnostics)
+ :config (add-hook 'after-init-hook #'global-flycheck-mode))
 #+end_src
 
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-(use-package company
-  :config
-  (setq company-idle-delay 0
-        company-minimum-prefix-length 2
-        company-selection-wrap-around t))
-(global-company-mode)(use-package company)
-(add-hook 'after-init-hook 'global-company-mode)
+*** Better Compile
+#+begin_src elisp
+;; Compile
+(global-set-key (kbd "M-c") 'compile)
+(setq compilation-scroll-output t)
+(add-hook 'compilation-finish-functions 'switch-to-buffer-other-window
+          'compilation)
+(setq compilation-auto-jump-to-first-error t)
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-(use-package which-key
-:config (which-key-mode))
+** Selection Manipulation
+
+*** Selection Expand / Contract
+#+begin_src elisp
+;; Expand region with M-n and contract with M-p
+(use-package
+ expand-region
+ :bind
+ (("M-n" . er/expand-region) ("M-p" . er/contract-region)))
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-(ido-mode)
-(ido-everywhere 1)
-(setq ido-enable-flex-matching t)
-    (global-set-key
-     "\M-x"
-     (lambda ()
-       (interactive)
-       (call-interactively
-        (intern
-         (ido-completing-read
-          "M-x "
-          (all-completions "" obarray 'commandp))))))
+*** Multi Cursor
+#+begin_src elisp
+;; Multiple cursors setup
+(use-package
+ multiple-cursors
+ :bind
+ (("C-M-n" . mc/mark-next-like-this)
+  ("C-M-p" . mc/mark-previous-like-this)
+  ("M-8" . mc/mark-all-like-this)
+  ("C-." . mc/mark-all-in-region-regexp)))
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-(use-package avy
-  :bind
-  ("C-;" . avy-goto-char-timer)
-  ("M-u" . avy-goto-line))
+*** Visual Replace
+#+begin_src elisp
+;; Visual replacement in real-time
+(use-package
+ visual-replace
+ :defer t
+ :bind
+ (("C-c r" . visual-replace)
+  :map
+  isearch-mode-map
+  ("C-c r" . visual-replace-from-isearch)))
+#+end_src
+
+*** Overwrite Selection By Typing
+#+begin_src elisp
+;; Enable natural selection behavior
+(delete-selection-mode t)
+#+end_src
+
+** Movement
+
+*** Easy Jumping
+#+begin_src elisp
+(use-package
+ avy
+ :bind ("C-;" . avy-goto-char-timer) ("M-u" . avy-goto-line))
 
 (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
 (setq avy-all-windows t)
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
-  (use-package drag-stuff
-    :bind
-    ("M-j" . drag-stuff-down)
-    ("M-k" . drag-stuff-up)
-    ("M-h" . drag-stuff-left)
-    ("M-l" . drag-stuff-right)
-    )
-  (drag-stuff-global-mode 1)
+*** Selection Movement
+#+begin_src elisp
+(use-package
+ drag-stuff
+ :bind
+ ("M-j" . drag-stuff-down)
+ ("M-k" . drag-stuff-up)
+ ("M-h" . drag-stuff-left)
+ ("M-l" . drag-stuff-right))
+(drag-stuff-global-mode 1)
 #+end_src
 
-#+begin_src elisp :tangle ~/.config/emacs/init.el
+*** Vim Like Motions
+
+**** Normal Mode "o"
+#+begin_src elisp
+;; Vim-like keybindings for inserting lines
+(defun vim-o ()
+  "Insert a new line below the current line and move to it."
+  (interactive)
+  (end-of-line)
+  (newline-and-indent))
+;; Bind Alt-o to `vim-o`
+(global-set-key (kbd "M-o") 'vim-o)
+#+end_src
+
+**** Normal Mode "O"
+#+begin_src elisp
+;; Vim-like keybindings for inserting lines above the current line
+(defun vim-O ()
+  "Insert a new line above the current line and move to it."
+  (interactive)
+  (beginning-of-line)
+  (newline-and-indent)
+  (forward-line -1)
+  (indent-according-to-mode))
+
+;; Bind Alt-o to `vim-O`
+(global-set-key (kbd "M-O") 'vim-O)
+#+end_src
+
+**** C-n Newline
+#+begin_src elisp
+;; Allow C-n to add newlines at the end of the buffer
+(setq next-line-add-newlines t)
+#+end_src
+
+
+**** Cursor Goes to Top / Bottom
+#+begin_src elisp
+(setq scroll-error-top-bottom t)
+#+end_src
+
+
+** Configuration Niceties
+
+*** Keybind to refresh config
+#+begin_src elisp
+(defun refresh-config ()
+  "Refresh emacs config"
+  (interactive)
+  (load-file user-init-file))
+
+(global-set-key (kbd "s-p") 'refresh-config)
+#+end_src
+
+*** Keybind to open config
+#+begin_src emacs-lisp
+(global-set-key
+ (kbd "C-c i")
+ (lambda ()
+   (interactive)
+   (find-file "~/.config/emacs/init.org")))
+#+end_src
+
+*** Elisp Formatting
+#+begin_src elisp
+(use-package
+ elisp-autofmt
+ :commands (elisp-autofmt-mode elisp-autofmt-buffer)
+ :hook (emacs-lisp-mode . elisp-autofmt-mode)
+ :bind ("s-e" . elisp-autofmt-region))
+(setq elisp-autofmt-python-bin "python3")
+#+end_src
+
+** Org Mode Configuration
+
+*** Org Mode Bullet Configuration
+#+begin_src elisp
+(add-hook 'org-mode-hook 'org-bullets-mode)
+#+end_src
+
+*** Org Mode Image Size Configuration
+#+begin_src elisp
+;; #+ATTR_HTML: width="100px"
+;; #+ATTR_ORG: :width 100
+(setq org-image-actual-width nil)
+#+end_src
+
+*** Org Mode Tangle Configuration
+#+begin_src elisp
+(add-hook
+ 'org-mode-hook
+ (lambda ()
+   (add-hook 'after-save-hook #'org-babel-tangle :append :local)))
+#+end_src
+
+*** Better Org Mode Handling
+#+begin_src elisp
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-M-l") 'org-metaright)
+  (define-key org-mode-map (kbd "C-M-h") 'org-metaleft))
+#+end_src
+
+* Third-party Packages
+#+begin_src elisp
   ;; Custom variables and faces
   (custom-set-variables
    ;; custom-set-variables was added by Custom.
@@ -341,7 +442,29 @@ otherwise, display it."
    '(inhibit-startup-screen t)
    '(initial-scratch-message nil)
    '(package-selected-packages
-     '(projectile rainbow-delimiters visual-replace ox-pandoc org-bullets ace-jump-zap beacon drag-stuff magit ace-window-mode ace-window avy doom-themes exec-path-from-shell which-key company flycheck tree-sitter-langs tree-sitter eglot multiple-cursors expand-region)))
+     '(projectile
+       rainbow-delimiters
+       visual-replace
+       ox-pandoc
+       org-bullets
+       ace-jump-zap
+       beacon
+       drag-stuff
+       magit
+       ace-window-mode
+       ace-window
+       avy
+       doom-themes
+       exec-path-from-shell
+       which-key
+       company
+       flycheck
+       org-make-toc
+       tree-sitter-langs
+       tree-sitter
+       eglot
+       multiple-cursors
+       expand-region)))
   (custom-set-faces
    ;; custom-set-faces was added by Custom.
    ;; If you edit it by hand, you could mess it up, so be careful.
@@ -349,3 +472,13 @@ otherwise, display it."
    ;; If there is more than one, they won't work right.
    )
 #+end_src
+
+* Tips & Tricks
+
+** Org Mode
+*** Export Org file to...
+**** HTML:                              C-c C-e h
+**** PDF:                               C-c C-e p
+*** Convert...
+**** Headline to into item, cycle type: C-c -
+**** Item to headline                 : C-c *
