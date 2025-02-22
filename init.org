@@ -1,3 +1,7 @@
+#+PROPERTY: header-args :results silent :tangle "~/.config/emacs/init.el"
+
+
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Install and set up exec-path-from-shell to load environment variables from .zshrc
 (use-package exec-path-from-shell
   :ensure t
@@ -5,7 +9,9 @@
   (when (memq window-system '(mac ns x))
     (setq exec-path-from-shell-variables '("PATH" "MANPATH" "ZSH" "SHELL"))
     (exec-path-from-shell-initialize)))
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Package manager setup
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
@@ -15,7 +21,9 @@
   (package-install 'use-package))
 (require 'use-package)
 (setq use-package-always-ensure t)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Use system clipboard
 (setq select-enable-clipboard t)(defun copy-from-osx ()
    (shell-command-to-string "pbpaste"))
@@ -26,90 +34,131 @@
          (process-send-eof proc))))
 (setq interprogram-cut-function 'paste-to-osx)
 (setq interprogram-paste-function 'copy-from-osx)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Stop making ugly back up files
 (setq make-backup-files nil)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; #+ATTR_HTML: width="100px"
 ;; #+ATTR_ORG: :width 100
 (setq org-image-actual-width nil)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 (add-hook 'org-mode-hook
           (lambda () (add-hook 'after-save-hook #'org-babel-tangle
                           :append :local)))
+#+end_src
 
-(use-package doom-themes
-  :ensure t
-  :config
-  ;; Global Settings (defaults)
-  (setq doom-themes-enable-bold t
-	doom-themes-enable-italic t)
-  ;; Load theme
-  (load-theme 'doom-snazzy t)
+#+begin_src elisp :tangle ~/.config/emacs/init.el
+  (use-package doom-themes
+    :ensure t
+    :config
+    ;; Global Settings (defaults)
+    (setq doom-themes-enable-bold t
+	  doom-themes-enable-italic t)
+    ;; Load theme
+    (load-theme 'doom-snazzy t)
 
-  ;; Enable flashing mode-line on errors
-  (doom-themes-visual-bell-config)
+    ;; Enable flashing mode-line on errors
+    (doom-themes-visual-bell-config)
 
-  ;; Corrects and improves org-mode's native fontification
-  (doom-themes-org-config))
+    ;; Corrects and improves org-mode's native fontification
+    (doom-themes-org-config))
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Tool bar settings
 (tool-bar-mode -1)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Line numbers
 (global-display-line-numbers-mode 1)
 (setq display-line-numbers-type 'relative)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Ensure proper mouse and key handling in terminal
 (setq xterm-mouse-mode t)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Disable annoying backup files
 (setq make-backup-files nil)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Allow C-n to add newlines at the end of the buffer
 (setq next-line-add-newlines t)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Enable natural selection behavior
 (delete-selection-mode t)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Relative line numbers
 (setq display-line-numbers-type 'relative)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Remove trailing whitespace on save
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Easier Splits
 (global-set-key (kbd "M-|") 'split-window-right)
 (global-set-key (kbd "M-\-") 'split-window-below)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Rebind `C-h` (help-command) to `C-?`
 (global-set-key (kbd "C-?") 'help-command)
+#+end_src
 
+
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Easy wrapping of matching characters
 (global-set-key (kbd "M-[") 'insert-pair)
 (global-set-key (kbd "M-{") 'insert-pair)
 (global-set-key (kbd "M-\"") 'insert-pair)
 (global-set-key (kbd "M-\'") 'insert-pair)
 (global-set-key (kbd "M-]") 'delete-pair)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Compile
 (global-set-key (kbd "M-c") 'compile)
 (setq compilation-scroll-output t)
 (add-hook 'compilation-finish-functions 'switch-to-buffer-other-window 'compilation)
 (setq compilation-auto-jump-to-first-error t)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Keep track of cursor easier
 (beacon-mode 1)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Awesome delete
 (global-set-key (kbd "M-z") 'ace-jump-zap-to-char)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Expand region with M-n and contract with M-p
 (use-package expand-region
   :bind
   (("M-n" . er/expand-region)
    ("M-p" . er/contract-region)))
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Multiple cursors setup
 (use-package multiple-cursors
   :bind
@@ -117,17 +166,23 @@
    ("C-K" . mc/mark-previous-like-this)
    ("M-8" . mc/mark-all-like-this)
    ("C-." . mc/mark-all-in-region-regexp)))
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Visual replacement in real-time
 (use-package visual-replace
    :defer t
    :bind (("C-c r" . visual-replace)
           :map isearch-mode-map
           ("C-c r" . visual-replace-from-isearch)))
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Rainbow delimiters
 (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Vim-like keybindings for inserting lines
 (defun vim-o ()
   "Insert a new line below the current line and move to it."
@@ -147,17 +202,25 @@
 (global-set-key (kbd "M-o") 'vim-o)
 ;; Bind Alt-o to `vim-O`
 (global-set-key (kbd "M-O") 'vim-O)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 (global-set-key (kbd "C-x w h") 'previous-buffer)
 (global-set-key (kbd "C-x w l") 'next-buffer)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 (setq scroll-error-top-bottom t)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 (use-package tree-sitter)
 (use-package tree-sitter-langs)
 
 (global-tree-sitter-mode)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 ;; Rust development setup
 (add-to-list 'load-path "~/Yro/repos/emacs_packages/rust-mode/")
 (autoload 'rust-mode "rust-mode" nil t)
@@ -173,7 +236,9 @@
 (add-to-list 'load-path "~/Yro/repos/emacs_packages/python-mode/")
 (autoload 'python-mode "python-mode" nil t)
 (add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 (defun toggle-eldoc ()
   "Toggle display of the eldoc documentation buffer.
 If the buffer (returned by `eldoc-doc-buffer`) is visible, delete its window;
@@ -188,7 +253,9 @@ otherwise, display it."
 
 ;; Bind the toggle function to a key of your choice.
 (global-set-key (kbd "M-e") 'toggle-eldoc)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 (use-package eglot
   :ensure t
   :hook ((python-mode . eglot-ensure)
@@ -197,7 +264,9 @@ otherwise, display it."
               ("C-c C-a" . eglot-code-actions)
 	      ("C-c C-r" . eglot-rename)
 	      ))
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 (use-package flycheck
   :ensure t
   :bind
@@ -207,7 +276,10 @@ otherwise, display it."
   ("C-c C-c D" . flymake-show-project-diagnostics)
   :config
   (add-hook 'after-init-hook #'global-flycheck-mode))
+#+end_src
 
+
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 (use-package company
   :config
   (setq company-idle-delay 0
@@ -215,10 +287,14 @@ otherwise, display it."
         company-selection-wrap-around t))
 (global-company-mode)(use-package company)
 (add-hook 'after-init-hook 'global-company-mode)
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 (use-package which-key
 :config (which-key-mode))
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 (ido-mode)
 (ido-everywhere 1)
 (setq ido-enable-flex-matching t)
@@ -231,7 +307,9 @@ otherwise, display it."
          (ido-completing-read
           "M-x "
           (all-completions "" obarray 'commandp))))))
+#+end_src
 
+#+begin_src elisp :tangle ~/.config/emacs/init.el
 (use-package avy
   :bind
   ("C-;" . avy-goto-char-timer)
@@ -239,30 +317,35 @@ otherwise, display it."
 
 (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
 (setq avy-all-windows t)
+#+end_src
 
-(use-package drag-stuff
-  :bind
-  ("M-j" . drag-stuff-down)
-  ("M-k" . drag-stuff-up)
-  ("M-h" . drag-stuff-left)
-  ("M-l" . drag-stuff-right)
-  )
-(drag-stuff-global-mode 1)
+#+begin_src elisp :tangle ~/.config/emacs/init.el
+  (use-package drag-stuff
+    :bind
+    ("M-j" . drag-stuff-down)
+    ("M-k" . drag-stuff-up)
+    ("M-h" . drag-stuff-left)
+    ("M-l" . drag-stuff-right)
+    )
+  (drag-stuff-global-mode 1)
+#+end_src
 
-;; Custom variables and faces
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(inhibit-startup-echo-area-message "")
- '(inhibit-startup-screen t)
- '(initial-scratch-message nil)
- '(package-selected-packages
-   '(projectile rainbow-delimiters visual-replace ox-pandoc org-bullets ace-jump-zap beacon drag-stuff magit ace-window-mode ace-window avy doom-themes exec-path-from-shell which-key company flycheck tree-sitter-langs tree-sitter eglot multiple-cursors expand-region)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+#+begin_src elisp :tangle ~/.config/emacs/init.el
+  ;; Custom variables and faces
+  (custom-set-variables
+   ;; custom-set-variables was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   '(inhibit-startup-echo-area-message "")
+   '(inhibit-startup-screen t)
+   '(initial-scratch-message nil)
+   '(package-selected-packages
+     '(projectile rainbow-delimiters visual-replace ox-pandoc org-bullets ace-jump-zap beacon drag-stuff magit ace-window-mode ace-window avy doom-themes exec-path-from-shell which-key company flycheck tree-sitter-langs tree-sitter eglot multiple-cursors expand-region)))
+  (custom-set-faces
+   ;; custom-set-faces was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   )
+#+end_src
