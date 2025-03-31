@@ -355,15 +355,43 @@ otherwise, display it."
  ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
  (setq lsp-keymap-prefix "C-c l")
  :hook
- ( ;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-  (XXX-mode . lsp)
-  ;; if you want which-key integration
+ ((python-ts-mode . lsp)
+  (js-ts-mode . lsp)
+  (tsx-ts-mode . lsp)
+  (typescript-mode . lsp)
   (lsp-mode . lsp-enable-which-key-integration))
  :commands lsp
  :ensure t)
 
 ;; optionally
 (use-package lsp-ui :commands lsp-ui-mode :ensure t)
+
+(use-package
+ lsp-ui
+ :ensure t
+ :after lsp-mode
+ :hook (lsp-mode . lsp-ui-mode)
+ :bind ("C-c k" . lsp-ui-peek-find-definitions)
+ :config
+ (setq
+  lsp-ui-doc-enable t
+  lsp-ui-doc-use-childframe t
+  lsp-ui-doc-position 'at-point
+  lsp-ui-doc-include-signature t
+  lsp-ui-sideline-enable t
+  lsp-ui-sideline-show-hover t
+  lsp-ui-sideline-show-diagnostics t
+  lsp-ui-sideline-show-code-actions t
+  lsp-ui-imenu-enable t
+  lsp-ui-imenu-kind-position 'top
+  lsp-ui-peek-enable t
+  lsp-ui-peek-always-show t
+  lsp-ui-peek-peek-height 20
+  lsp-ui-peek-list-width 50))
+(add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
+(add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
+(add-hook 'before-save-hook #'lsp-format-buffer)
 
 (use-package
  flycheck
