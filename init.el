@@ -1,3 +1,12 @@
+(setq
+ backup-directory-alist '(("." . "~/.config/emacs/backup"))
+ backup-by-copying t ; Don't delink hardlinks
+ version-control t ; Use version numbers on backups
+ delete-old-versions t ; Automatically delete excess backups
+ kept-new-versions 20 ; how many of the newest versions to keep
+ kept-old-versions 5 ; and how many of the old
+ )
+
 ;; Install and set up exec-path-from-shell to load environment variables from .zshrc
 (use-package
  exec-path-from-shell
@@ -52,6 +61,9 @@
  ;; Corrects and improves org-mode's native fontification
  (doom-themes-org-config))
 
+(use-package dired-preview)
+(dired-preview-global-mode 1)
+
 ;; Example configuration for Consult
 (use-package
  consult
@@ -80,7 +92,7 @@
   ("M-y" . consult-yank-pop) ;; orig. yank-pop
   ;; M-g bindings in `goto-map'
   ("M-g e" . consult-compile-error)
-  ("M-g f" . consult-flymake) ;; Alternative: consult-flycheck
+  ("M-g f" . consult-flycheck) ;; Alternative: consult-flycheck
   ("M-g g" . consult-goto-line) ;; orig. goto-line
   ("M-g M-g" . consult-goto-line) ;; orig. goto-line
   ("M-g o" . consult-outline) ;; Alternative: consult-org-heading
@@ -355,10 +367,11 @@ otherwise, display it."
  ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
  (setq lsp-keymap-prefix "C-c l")
  :hook
- ((python-ts-mode . lsp)
+ ((python-mode . lsp)
   (js-ts-mode . lsp)
   (tsx-ts-mode . lsp)
   (typescript-mode . lsp)
+  (php-mode . lsp)
   (lsp-mode . lsp-enable-which-key-integration))
  :commands lsp
  :ensure t)
@@ -388,7 +401,8 @@ otherwise, display it."
   lsp-ui-peek-always-show t
   lsp-ui-peek-peek-height 20
   lsp-ui-peek-list-width 50))
-(add-to-list 'auto-mode-alist '("\\.py\\'" . python-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.php\\'" . php-mode))
+(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
 (add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
 (add-hook 'before-save-hook #'lsp-format-buffer)
@@ -396,19 +410,23 @@ otherwise, display it."
 (use-package
  flycheck
  :ensure t
- :bind
- ("C-c C-d l" . flymake-goto-next-error)
- ("C-c C-d h" . flymake-goto-prev-error)
- ("C-c C-c d" . flymake-show-buffer-diagnostics)
- ("C-c C-c D" . flymake-show-project-diagnostics)
  :config (add-hook 'after-init-hook #'global-flycheck-mode))
 
 ;; Compile
-(global-set-key (kbd "M-c") 'compile)
+(defun my/save-and-recompile ()
+  "Save all buffers and recompile."
+  (interactive)
+  (save-some-buffers t)
+  (recompile))
+
+(global-set-key (kbd "M-c") 'my/save-and-recompile)
+
 (setq compilation-scroll-output t)
-(add-hook 'compilation-finish-functions 'switch-to-buffer-other-window
-          'compilation)
 (setq compilation-auto-jump-to-first-error t)
+(add-hook 'compilation-finish-functions
+          (lambda (buf str)
+            (when (string-match "finished" str)
+              (switch-to-buffer-other-window buf))))
 
 ;; Expand region with M-n and contract with M-p
 (use-package
