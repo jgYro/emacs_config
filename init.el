@@ -413,13 +413,7 @@ otherwise, display it."
  :config (add-hook 'after-init-hook #'global-flycheck-mode))
 
 ;; Compile
-(defun my/save-and-recompile ()
-  "Save all buffers and recompile."
-  (interactive)
-  (save-some-buffers t)
-  (recompile))
-
-(global-set-key (kbd "M-c") 'my/save-and-recompile)
+(global-set-key (kbd "M-c") 'compile)
 
 (setq compilation-scroll-output t)
 (setq compilation-auto-jump-to-first-error t)
@@ -455,6 +449,13 @@ otherwise, display it."
 
 ;; Enable natural selection behavior
 (delete-selection-mode t)
+
+(global-set-key (kbd "C-c b i") 'next-buffer)
+(global-set-key (kbd "C-c b o") 'previous-buffer)
+(global-set-key (kbd "C-c b h") 'windmove-left)
+(global-set-key (kbd "C-c b l") 'windmove-right)
+(global-set-key (kbd "C-c b j") 'windmove-down)
+(global-set-key (kbd "C-c b k") 'windmove-up)
 
 (use-package
  avy
