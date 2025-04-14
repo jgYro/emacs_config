@@ -384,7 +384,7 @@ otherwise, display it."
  :ensure t
  :after lsp-mode
  :hook (lsp-mode . lsp-ui-mode)
- :bind ("C-c k" . lsp-ui-peek-find-definitions)
+ :bind (("C-c k" . lsp-ui-peek-find-definitions) ("C-c SPC" . lsp-ui-doc-toggle) ("C-c ." . lsp-ui-doc-focus-frame) ("C-c ," . lsp-ui-doc-unfocus-frame))
  :config
  (setq
   lsp-ui-doc-enable t
@@ -429,13 +429,13 @@ otherwise, display it."
  (("M-n" . er/expand-region) ("M-p" . er/contract-region)))
 
 ;; Multiple cursors setup
+(use-package visual-regexp :bind (("s-." . vr/mc-mark)))
 (use-package
  multiple-cursors
  :bind
- (("C-M-n" . mc/mark-next-like-this)
-  ("C-M-p" . mc/mark-previous-like-this)
-  ("M-8" . mc/mark-all-like-this)
-  ("C-." . mc/mark-all-in-region-regexp)))
+ (("s-n" . mc/mark-next-like-this)
+  ("s-p" . mc/mark-previous-like-this)
+  ("s-8" . mc/mark-all-like-this)))
 
 ;; Visual replacement in real-time
 (use-package
