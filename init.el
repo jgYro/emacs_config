@@ -264,6 +264,8 @@
 ;; Rebind `C-h` (help-command) to `C-?`
 (global-set-key (kbd "C-?") 'help-command)
 
+(global-git-gutter-mode +1)
+
 ;; Line numbers
 (global-display-line-numbers-mode 1)
 (setq display-line-numbers-type 'relative)
@@ -365,7 +367,8 @@ otherwise, display it."
  lsp-mode
  :init
  ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
- (setq lsp-keymap-prefix "C-c l")
+ (setq lsp-keymap-prefix "s-l")
+ :bind (("s-a" . lsp-execute-code-action))
  :hook
  ((python-mode . lsp)
   (js-ts-mode . lsp)
@@ -384,7 +387,11 @@ otherwise, display it."
  :ensure t
  :after lsp-mode
  :hook (lsp-mode . lsp-ui-mode)
- :bind (("C-c k" . lsp-ui-peek-find-definitions) ("C-c SPC" . lsp-ui-doc-toggle) ("C-c ." . lsp-ui-doc-focus-frame) ("C-c ," . lsp-ui-doc-unfocus-frame))
+ :bind
+ (("C-c k" . lsp-ui-peek-find-definitions)
+  ("C-c C-SPC" . lsp-ui-doc-toggle)
+  ("C-c ." . lsp-ui-doc-focus-frame)
+  ("C-c ," . lsp-ui-doc-unfocus-frame))
  :config
  (setq
   lsp-ui-doc-enable t
